@@ -1,0 +1,23 @@
+{
+  "name": "threejs",
+  "version": "1.0.0",
+  "description": "threejs,you or me",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "live-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kmh0228/threejs.git"
+  },
+  "author": "s5ming",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kmh0228/threejs/issues"
+  },
+  "homepage": "https://github.com/kmh0228/threejs#readme",
+  "dependencies": {
+    "three": "^0.119.0"
+  }
+}
