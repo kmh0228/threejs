@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
-    <script src="./node_modules/three/build/three.js"></script>
-    <script src="./node_modules/three/examples/js/utils/SceneUtils.js"></script>
-    <script src="./threejs3dbar.js"></script>
+    <script src="../../node_modules/three/build/three.js"></script>
+    <script src="../../node_modules/three/examples/js/utils/SceneUtils.js"></script>
 </head>
 <body>
-    <div id="WebGL-output" style="width: 559px;height:253px;"></div>
+    <div id="WebGL-output" style="width: 559px;height:253px; border:1px solid #ccc;"></div>
 </body>
 </html>
 <script>
@@ -21,7 +20,8 @@ var width = 559,   // 宽度
     carmern = 1,    // 相机近面距离
     carmerf = 1000, // 相机远面
     barR = 30,       // 圆柱半径
-    barmR = 20       //空心半径
+	barmR = 15,       //空心半径
+	opacity= 0.6
 
 
 
@@ -50,24 +50,31 @@ scene.add(new THREE.AmbientLight(0xffff));
 //添加平行灯光
 scene.add(new THREE.DirectionalLight(0xffffff));
 
-// 需要进行布尔运算的中心柱子
+// 添加底座
+var geometry = new THREE.CylinderGeometry( 36, 36, 2, 50 );
+	geometry.translate(0,0,0);
+	var material = new THREE.MeshLambertMaterial({color: 0x002aa0});
+	var cylinder = new THREE.Mesh( geometry, material );
+	cylinder.rotation.x = 2.0888322790658975 - Math.PI /2 ;
+	cylinder.rotation.y = Math.PI;
+	scene.add( cylinder );
 
 //添加扇形柱子
 function semiCircle(r, n, o) {
 				var p = new THREE.Shape();
-                p.arc(0, 0, r, n, o);
+				p.absarc(0, 0, r, n, o);
                 // p.lineTo(barmR * Math.cos(o),barmR * Math.sin(o));
-                // p.arc(0, 0, barmR, n , o,true);
-                p.lineTo(0,0);
-				var q = {
-					x: r * Math.cos(n),
-					y: r * Math.sin(n)
-				};
-				p.lineTo(q.x, q.y);
+                p.absarc(0, 0, barmR, o , n , true);
+                // // p.lineTo(0,0);
+				// var q = {
+				// 	x: r * Math.cos(n),
+				// 	y: r * Math.sin(n)
+				// };
+				// p.lineTo(q.x, q.y);
 				return p
             }
-var degstart = -3, degend = 1.7
-var mesh1 = new THREE.MeshLambertMaterial({color: 0x063279,opacity:0.5,transparent:true});
+var degstart = -2.8, degend = 1.8
+var mesh1 = new THREE.MeshPhongMaterial({color: 0x063279,opacity:opacity,transparent:true,overdraw:true});
 var s1 = new THREE.ExtrudeGeometry(semiCircle(barR, degstart, degend), {
 						amount: 25,
 						bevelThinkness: 2,
@@ -82,7 +89,7 @@ sbar1.rotation.x = 2.0888322790658975;
 sbar1.rotation.y = Math.PI;
 scene.add(sbar1);
 
-var mesh2 = new THREE.MeshLambertMaterial({color: 0xff0000,opacity:0.5,transparent:true});
+var mesh2 = new THREE.MeshPhongMaterial({color: 0xff0000,opacity:opacity,transparent:true});
 var s2 = new THREE.ExtrudeGeometry(semiCircle(barR, degend, degstart), {
 						amount: 10,
 						bevelThinkness: 2,

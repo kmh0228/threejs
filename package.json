@@ -18,6 +18,7 @@
   },
   "homepage": "https://github.com/kmh0228/threejs#readme",
   "dependencies": {
+    "dat.gui": "^0.7.7",
     "three": "^0.119.0"
   }
 }

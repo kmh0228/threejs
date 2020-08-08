@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+</head>
+<body>
+    <div id="dom" style="width:500px; height:300px;"></div>
+</body>
+</html>
+<script type="module">
+import '../../node_modules/three/build/three.js'
+import '../../node_modules/three/examples/js/controls/OrbitControls.js'
+import './fanShaped.js'
+class Bar3D{
+    constructor(opt){
+        this.opt = Object.assign({
+            dom:null,       // 容器，id或者dom
+            // width:200,      // 宽度
+            // height:100,     //高度
+            camera:null,    // 相机，参数需要是THREE中的相机对象，不填则默认透视相机
+            cameraPositon:[0,-100,100],       // 相机位子
+            cameraLookAt:[0,0,0],            // 相机观察的位子
+            lights:[],      // 灯光，需要是THREE中的灯光参数，不填的话就交给我随意发挥
+            // 颜色
+            colors:['#c23531','#2f4554', '#61a0a8', '#d48265', '#91c7ae','#749f83',  '#ca8622', '#bda29a','#6e7074', '#546570', '#c4ccd3'],
+            // 数据
+            values:[{label:'a',value:5},{label:'b',value:6},{label:'c',value:7},{label:'d',value:8},
+            {label:'a',value:5},{label:'b',value:6},{label:'c',value:7},{label:'d',value:8}],
+            segre:1,    //每个扇形距离中心点的距离
+        },opt)
+        this.scene = null // 场景
+        this.renderer = null // 渲染器
+        this.dom = null      // 容器
+        this.init()
+    }
+    // 初始化
+    init(){
+        if (typeof THREE == "undefined") {
+            throw new Error("Bar3D需要引入threejs!")
+        }
+        let opt = this.opt
+        let dom = this.dom = opt.dom = document.getElementById(opt.dom) || opt.dom    // 定义容器
+        opt.width = opt.width || dom.clientWidth    // 初始化宽度
+        opt.height = opt.height || dom.clientHeight // 初始化高度
+        this.initThree()    // 初始化threejs环境
+        this.addBarAndText()       // 添加饼状图 和 文字
+        this.render()       // 渲染
+        this.addControl()   // 添加鼠标键盘事件
+    }
+    // 初始化threejs环境
+    initThree(){
+        let opt = this.opt
+        this.scene = new THREE.Scene()
+        opt.camera = opt.camera || new THREE.PerspectiveCamera(45,opt.width/opt.height,1,1000)
+        opt.camera.position.set(...opt.cameraPositon)
+        opt.camera.lookAt(...opt.cameraLookAt)
+        let renderer = this.renderer = new THREE.WebGLRenderer({ antialias: true,alpha:true })
+        renderer.setSize(opt.width,opt.height)
+        this.dom.appendChild(renderer.domElement)
+        // 添加灯光
+        if(!(opt.lights&&opt.lights.length&&opt.lights.length>0)){
+            opt.lights = [new THREE.AmbientLight(0x6c6c6c),new THREE.SpotLight(0xffffff)]
+            opt.lights[1].position.set(-20, 20, 60);
+			opt.lights[1].shadow.mapSize.width = 5120;
+			opt.lights[1].shadow.mapSize.height = 5120;
+			opt.lights[1].castShadow = true;
+        }
+        opt.lights.forEach(light => {
+            this.scene.add(light)
+        });
+    }
+    // 添加物体的方法
+    addObj(obj,bol){ //添加物体进去  obj:物体    bol:是否立即渲染
+        this.scene.add(obj)
+        bol && this.render()
+    }
+    // 渲染
+    render(){
+        this.renderer && this.renderer.render(this.scene,this.opt.camera)
+    }
+    // 添加饼图 和 文字
+    addBarAndText(){
+        let opt = this.opt
+        // // 添加三维坐标系
+        // let v3 = new THREE.AxisHelper(30)
+        // this.addObj(v3)
+        // 添加一个扇形图
+        let sumValue = opt.values.reduce((last,now)=> last + now.value, 0 )
+        let degs = opt.values.reduce((last,now)=>{
+            return [...last,last[last.length -1] + now.value / sumValue * Math.PI *2]
+        },[0])
+        opt.values.forEach((item,i) =>{
+            this.addObj(fanShaped({
+                color:opt.colors[i],
+                start:degs[i],
+                end:degs[i+1],
+                vertex:[opt.segre*Math.cos(degs[i]/2 + degs[i+1]/2),opt.segre*Math.sin(degs[i]/2 + degs[i+1]/2)]
+            }))
+            let text = new THREE.TextGeometry('three info')
+            //text.position.set(10,10,10)
+            this.addObj(text)
+        })
+    }
+    // 添加鼠标操作事件
+    addControl(){
+        let control = this.control = new THREE.OrbitControls(this.opt.camera,this.renderer.domElement)
+        control.addEventListener('change',()=>{this.render()})
+    }
+}
+
+new Bar3D({
+    dom:'dom'
+})
+
+</script>

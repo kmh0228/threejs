@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <script src="../node_modules/three/build/three.js"></script>
+    <script src="../node_modules/three/examples/js/controls/OrbitControls.js"></script>
+</head>
+<body>
+    <div id="box" style="width:800px; height:400px; margin:20px auto;"></div>
+</body>
+</html>
+<script>
+var scene = new THREE.Scene()
+var camera = new THREE.PerspectiveCamera(75,800/400,0.1,1000)
+camera.position.z = 100
+var render = new THREE.WebGLRenderer()
+render.setSize(800,400)
+document.getElementById('box').appendChild(render.domElement)
+
+var geome = new THREE.BoxGeometry(10,10,10)
+var material = new THREE.MeshBasicMaterial({color:'#f00'})
+var box = new THREE.Mesh(geome,material)
+box.rotation.x = box.rotation.y = 32
+scene.add(box)
+
+function ren(){
+    render.render(scene,camera)
+}
+ren()
+
+var controls = new THREE.OrbitControls(camera,render.domElement);
+controls.addEventListener('change',ren)
+
+
+</script>

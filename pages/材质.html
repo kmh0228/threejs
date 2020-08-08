@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="../node_modules/dat.gui/build/dat.gui.css">
+    <title>Document</title>
+    <script src="../node_modules/dat.gui/build/dat.gui.js"></script>
+    <script src="../node_modules/three/build/three.js"></script>
+    <style>
+    *{ margin:0; padding:0;}
+    .item{ width:20%; float:left; height:300px;}
+    .item .obj{height:250px;}
+    .item p{ height:20px; text-align: center;}
+    </style>
+</head>
+<body>
+    <div style="overflow:hidden; width:80%;" id="content">
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+            <div class="item"><div class="obj"></div><p class="material"><p class="meta"></p></div>
+    </div>
+</body>
+</html>
+<script>
+// 设置gui参数
+function control(){
+    this.materialColor = '#ccc' // 材质颜色
+    this.useAmbient = true      // 是否使用环境光
+    this.AmbientColor = '#fff'  // 环境光颜色
+    this.AmbientInte = 1        // 环境光强度
+    this.usePoint = true        // 是否使用点光源
+    this.pointColor = '#fff'    // 点光源颜色
+    this.pointInte = 1          // 点光源强度
+    this.pointDistan = 0        // 点光源距离
+    this.pointDecay = 2         // 点光源强度衰减系数
+    this.pointX = 3             // 点光源位置x
+    this.pointY = 3             // 点光源位置y
+    this.pointZ = 3             // 点光源位置z
+    this.useSpot = true         // 是否使用聚光灯
+    this.spotColor = '#fff'     // 聚光灯颜色
+    this.spotInte = 1           // 聚光灯光照强度
+    this.spotDistan = 0         // 聚光灯光照距离
+    this.spotAngle = 90         // 聚光灯角度 0-90
+    this.spotpenum = 0          // 聚光灯边缘模糊化 0-1
+    this.spotDecay = 2          // 聚光灯强度衰减系数
+    this.spotX = 0              // 聚光灯位子x
+    this.spotY = 0              // 聚光灯位子y
+    this.spotZ = 0              // 聚光灯位子z
+    this.useDirectional = true  // 是否使用平行光
+    this.directColor = '#fff'   // 平行光颜色
+    this.directInte = 1         // 平行光强度
+}
+var opt = new control();
+var gui = new dat.GUI();
+
+// 所有材质
+var materials = [
+    {key:'MeshBasicMaterial',opt:{},meta:'网格基础材质'},
+    {key:'MeshDepthMaterial',opt:{},meta:'网格深度材质'},
+    {key:'MeshNormalMaterial',opt:{},meta:'网格法向材质'},
+    {key:'MeshFaceMaterial',opt:{},meta:'网格面材质'},
+    {key:'MeshLambertMaterial',opt:{},meta:'网格lambert材质'},
+    {key:'MeshPhongMaterial',opt:{},meta:'网格phong材质'},
+    {key:'ShaderMaterial',opt:{},meta:'着色器材质'},
+    {key:'LineBasicMaterial',opt:{},meta:'直线基础材质'},
+    {key:'LineDashedMaterial',opt:{dashSize:5,gapSize:2},meta:'虚线材质'}
+]
+var doms = document.querySelectorAll('#content .obj')
+document.querySelectorAll('#content .material').forEach((lab,i) => lab.innerHTML = materials[i]['key'])
+document.querySelectorAll('#content .meta').forEach((meta,i) => meta.innerHTML = materials[i]['meta'])
+var materialobjs = []
+var cubes = []
+
+//放入不同材质的东西
+function updateView(){
+    doms.forEach((dom,i) => {
+        var scene , camera , renderer;
+        scene = new THREE.Scene();
+        camera = new THREE.PerspectiveCamera(75,dom.offsetWidth/dom.offsetHeight,0.1,1000);
+        renderer = new THREE.WebGLRenderer()
+        renderer.setSize(dom.offsetWidth,dom.offsetHeight);
+        dom.innerHTML = ''
+        dom.appendChild(renderer.domElement)
+        var geometry = new THREE.BoxGeometry(5,5,5);					//正方体
+        console.log(materials[i]['key'])
+        var material = new THREE[materials[i]['key']]({color:opt.materialColor,...materials[i]['opt']});		//材质
+        materialobjs.push(material)
+        var cube = new THREE.Mesh(geometry,material);						//网格
+        cubes.push(cube)
+        scene.add(cube);
+// 添加光
+try{
+opt.useAmbient && scene.add(new THREE.AmbientLight( opt.AmbientColor, opt.AmbientInte ))
+if(opt.usePoint){
+   var pointLight = new THREE.PointLight( opt.pointColor, opt.pointInte, opt.pointDistan, opt.pointDecay )
+   pointLight.position.set(opt.pointX,opt.pointY,opt.pointZ)
+   scene.add(pointLight)
+}
+if(opt.useSpot){
+   var spotLight = new THREE.SpotLight( opt.spotColor, opt.spotInte, opt.spotDistan, opt.spotAngle, opt.spotpenum, opt.spotDecay )
+   spotLight.position.set(opt.spotX,opt.spotY,opt.spotZ)
+   spotLight.add(spotLight)
+}
+opt.useDirectional && scene.add(new THREE.useDirectional( opt.directColor, opt.directInte ))
+}catch(error){
+    console.log(error)
+}
+        camera.position.z = 18;
+        function animate(){
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene,camera);
+        }
+        animate();
+    })
+}
+updateView()
+
+gui.addColor(opt,'materialColor').name('材质颜色').onFinishChange(val => {updateView()})
+gui.add(opt,'useAmbient').name('是否使用环境光').onFinishChange(val => {updateView()})
+gui.addColor(opt,'AmbientColor').name('环境光颜色').onFinishChange(val => {updateView()})
+gui.add(opt,'AmbientInte').name('环境光强度').onFinishChange(val => {updateView()})
+gui.add(opt,'usePoint').name('是否使用点光源').onFinishChange(val => {updateView()})
+gui.addColor(opt,'pointColor').name('点光源颜色').onFinishChange(val => {updateView()})
+gui.add(opt,'pointInte').name('点光源强度').onFinishChange(val => {updateView()})
+gui.add(opt,'pointDistan').name('点光源距离').onFinishChange(val => {updateView()})
+gui.add(opt,'pointDecay').name('点光源强度衰减系数').onFinishChange(val => {updateView()})
+var f1 = gui.addFolder('点光源位置')
+f1.add(opt,'pointX').name('x').onFinishChange(val => {updateView()})
+f1.add(opt,'pointY').name('y').onFinishChange(val => {updateView()})
+f1.add(opt,'pointZ').name('z').onFinishChange(val => {updateView()})
+gui.add(opt,'useSpot').name('是否使用聚光灯').onFinishChange(val => {updateView()})
+gui.addColor(opt,'spotColor').name('聚光灯颜色').onFinishChange(val => {updateView()})
+gui.add(opt,'spotInte').name('聚光灯光照强度').onFinishChange(val => {updateView()})
+gui.add(opt,'spotDistan').name('聚光灯光照距离').onFinishChange(val => {updateView()})
+gui.add(opt,'spotAngle',0,90).name('聚光灯角度').onFinishChange(val => {updateView()})
+gui.add(opt,'spotpenum',0,1).step(0.001).name('聚光灯边缘模糊化').onFinishChange(val => {updateView()})
+gui.add(opt,'spotDecay').name('聚光灯强度衰减系数').onFinishChange(val => {updateView()})
+var f2 = gui.addFolder('聚光灯位子')
+f2.add(opt,'spotX').name('x').onFinishChange(val => {updateView()})
+f2.add(opt,'spotY').name('y').onFinishChange(val => {updateView()})
+f2.add(opt,'spotZ').name('z').onFinishChange(val => {updateView()})
+gui.add(opt,'useDirectional').name('是否使用平行光').onFinishChange(val => {updateView()})
+gui.addColor(opt,'directColor').name('平行光颜色').onFinishChange(val => {updateView()})
+gui.add(opt,'directInte').name('平行光强度').onFinishChange(val => {updateView()})
+
+</script>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			.box{
+				width:800px; height:400px; margin: 50px auto;  position:relative;
+			}
+			
+			.message{
+				border:1px solid #000;
+				position:absolute;
+				top:20px;
+				left:20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="box" class="box">
+		    <div id="message" class="message">
+		        dom + css
+		    </div>
+		</div>
+	</body>
+</html>
+<script src="../node_modules/three/build/three.js" type="text/javascript" charset="utf-8"></script>
+<script type="text/javascript">
+	var scene = new THREE.Scene();
+	var camera = new THREE.PerspectiveCamera(45,2,1,500);
+	camera.position.z =200
+	var renderer = new THREE.WebGLRenderer({ antialias: true,alpha:true });
+	renderer.setSize(800,400);
+	document.getElementById('box').appendChild(renderer.domElement);
+	
+
+	var particleMaterial = new THREE.SpriteMaterial( {
+ 
+	color: 0x000000,
+	program: function ( context ) {
+
+	 context.beginPath();
+	 context.font="bold 20px Arial";
+	 context.fillStyle="#058";
+	 context.transform(-1,0,0,1,0,0);
+	 context.rotate(Math.PI);
+	 context.fillText( wordFont , 0, 0 );
+
+ }
+})
+
+var materiial = new THREE.MeshBasicMaterial({color:'#f00'})
+
+var obj = new THREE.Mesh(particleMaterial)
+
+
+		
+		scene.add(obj);
+		
+		renderer.render( scene ,camera);
+	
+	
+	
+</script>
